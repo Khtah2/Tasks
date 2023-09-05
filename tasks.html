@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Manager</title>
+    <style>
+        /* Add some basic styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            width: 100%;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        small {
+            font-size: 12px;
+            color: #888;
+            display: block;
+            margin-top: 6px;
+        }
+
+        button {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            background-color: #4caf50;
+            color: #fff;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Task Manager</h1>
+    
+    <!-- Table to display tasks -->
+    <table id="taskTable">
+        <tr>
+            <th>Task</th>
+            <th>Time</th>
+            <th></th>
+        </tr>
+    </table>
+    
+    <!-- Form to add a new task -->
+    <h2>Add New Task</h2>
+    <form onsubmit="addTask(event)">
+        <label for="task">Task:</label>
+        <input type="text" id="task" required>
+        <br>
+        <label for="time">Time:</label>
+        <input type="text" id="time" pattern="(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9] (AM|PM)" required>
+        <small>Format: HH:MM AM/PM (e.g., 10:00 AM)</small>
+        <br>
+        <button type="submit">Add Task</button>
+    </form>
+    
+    <script>
+        // Function to retrieve tasks from localStorage
+        function getTasks() {
+            var tasks = localStorage.getItem('tasks');
+            return tasks ? JSON.parse(tasks) : [];
+        }
+        
+        // Function to save tasks to localStorage
+        function saveTasks(tasks) {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+        
+        // Function to render tasks in the table
+        function renderTasks() {
+            var tasks = getTasks();
+            var table = document.getElementById('taskTable');
+            table.innerHTML = `
+                <tr>
+                    <th>Task</th>
+                    <th>Time</th>
+                    <th></th>
+                </tr>
+            `;
+            
+            tasks.forEach(function(task, index) {
+                var row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${task.task}</td>
+                    <td>${task.time}</td>
+                    <td>
+                        <button onclick="editTask(${index})">Edit</button>
+                        <button onclick="deleteTask(${index})">Delete</button>
+                    </td>
+                `;
+                table.appendChild(row);
+            });
+        }
+        
+        // Function to add a new task
+        function addTask(event) {
+            event.preventDefault(); // Prevent form submission
+            
+            // Get the input values
+            var taskInput = document.getElementById('task');
+            var timeInput = document.getElementById('time');
+            var task = taskInput.value;
+            var time = timeInput.value;
+            
+            // Create the task object
+            var newTask = {
+                task: task,
+                time: time
+            };
+            
+            // Get the existing tasks from storage
+            var tasks = getTasks();
+            
+            // Add the new task to the tasks array
+            tasks.push(newTask);
+            
+            // Save the updated tasks to storage
+            saveTasks(tasks);
+            
+            // Clear theinput fields
+            taskInput.value = '';
+            timeInput.value = '';
+            
+            // Render the updated tasks in the table
+            renderTasks();
+        }
+        
+        // Function to delete a task
+        function deleteTask(index) {
+            // Get the existing tasks from storage
+            var tasks = getTasks();
+            
+            // Remove the task at the specified index
+            tasks.splice(index, 1);
+            
+            // Save the updated tasks to storage
+            saveTasks(tasks);
+            
+            // Render the updated tasks in the table
+            renderTasks();
+        }
+        
+        // Function to edit a task
+        function editTask(index) {
+            // Get the existing tasks from storage
+            var tasks = getTasks();
+            
+            // Get the task at the specified index
+            var task = tasks[index];
+            
+            // Update the input fields with the task details
+            var taskInput = document.getElementById('task');
+            var timeInput = document.getElementById('time');
+            taskInput.value = task.task;
+            timeInput.value = task.time;
+            
+            // Delete the task from the tasks array
+            tasks.splice(index, 1);
+            
+            // Save the updated tasks to storage
+            saveTasks(tasks);
+            
+            // Render the updated tasks in the table
+            renderTasks();
+        }
+        
+        // Render the tasks when the page loads
+        window.onload = renderTasks;
+    </script>
+</body>
+</html>
